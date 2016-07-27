@@ -12,7 +12,7 @@ using namespace std;
 #define HIDDEN_NEURONS 4
 #define OUTPUT_NEURONS 4
 
-double wih[INPUT_NEURONS+1][HIDDEN_NEURONS];
+double wih[INPUT_NEURONS + 1][HIDDEN_NEURONS];
 double who[HIDDEN_NEURONS + 1][OUTPUT_NEURONS];
 
 double inputs[INPUT_NEURONS];
@@ -82,7 +82,7 @@ int main()
 	int i, sample = 0, iterations = 0, sum = 0, teachIter = 100000;
 
 	FILE *out = fopen("stats.txt", "w");
-	bool teach = true;
+	bool teach = false;
 	if (teach)
 	{
 		srand((unsigned)time(NULL));
@@ -122,50 +122,45 @@ int main()
 	else
 	{
 		fstream fileRead;
-		fileRead.open("weight2.bin", ios::binary | ios::in);
-		//FILE *readWeight = fopen("weight2.txt", "r");
-		char line[256];
+		fileRead.open("weight2.txt", /*ios::binary |*/ ios::in);
 		for (int inp = 0; inp < INPUT_NEURONS + 1; inp++)
 		{
 			for (int hid = 0; hid < HIDDEN_NEURONS; hid++)
 			{
-				//fgets(line, sizeof(line), readWeight);
-				fileRead.read(line, sizeof(double));
-				wih[inp][hid] = atof(line);
-				//fprintf(weights, "%g\n", wih[inp][hid]);
+				fileRead >> wih[inp][hid];
 			}
 		}
 		for (int hid = 0; hid < HIDDEN_NEURONS + 1; hid++)
 		{
 			for (int outp = 0; outp < OUTPUT_NEURONS; outp++)
 			{
-				//fgets(line, sizeof(line), readWeight);
-				fileRead.read(line, sizeof(double));
-				who[hid][outp] = atof(line);
-				//fprintf(weights, "%g\n", wih[hid][outp]);
+				fileRead >> who[hid][outp];
 			}
 		}
 
 		for (int j = 0; j < HIDDEN_NEURONS; j++)
 		{
-			//fgets(line, sizeof(line), readWeight);
-			fileRead.read(line, sizeof(double));
-			hidden[j] = atof(line);
-			//fprintf(weights, "%g\n", hidden[j]);
+			fileRead >> hidden[j];
 		}
 		for (int j = 0; j < OUTPUT_NEURONS; j++)
 		{
-			//fgets(line, sizeof(line), readWeight);
-			fileRead.read(line, sizeof(double));
-			target[j] = atof(line);
-			//fprintf(weights, "%g\n", target[j]);
+			fileRead >>	target[j];
 		}
 		for (int j = 0; j < OUTPUT_NEURONS; j++)
 		{
-			//fgets(line, sizeof(line), readWeight);
-			fileRead.read(line, sizeof(double));
-			actual[j] = atof(line);
-			//fprintf(weights, "%g\n", actual[j]);
+			fileRead >>	actual[j];
+		}
+		for (int j = 0; j < INPUT_NEURONS; j++)
+		{
+			fileRead >> inputs[j];
+		}
+		for (int j = 0; j < OUTPUT_NEURONS; j++)
+		{
+			fileRead >> erro[j];
+		}
+		for (int j = 0; j < HIDDEN_NEURONS; j++)
+		{
+			fileRead >> errh[j];
 		}
 		fileRead.close();
 	}
@@ -224,11 +219,11 @@ int main()
 	feedForward();
 	printf("0103 Action %s\n", strings[action(actual)]);
 
-	inputs[0] = 1.0; inputs[1] = 1.0; inputs[2] = 0.0; inputs[3] = 1.0;
+	inputs[0] = 2.0; inputs[1] = 1.0; inputs[2] = 0.0; inputs[3] = 1.0;
 	feedForward();
-	printf("1101 Action %s\n", strings[action(actual)]);
+	printf("2101 Action %s\n", strings[action(actual)]);
 
-	inputs[0] = 2.0; inputs[1] = 1.0; inputs[2] = 1.0; inputs[3] = 11.0;
+	inputs[0] = 1.0; inputs[1] = 0.0; inputs[2] = 1.0; inputs[3] = 1.0;
 	feedForward();
 	printf("1011 Action %s\n", strings[action(actual)]);
 
@@ -237,45 +232,50 @@ int main()
 	if (teach)
 	{
 		fstream fileRead;
-		fileRead.open("weight2.bin", ios::binary | ios::out);
-		//FILE *weights = fopen("weight2.txt", "w");
+		fileRead.open("weight2.txt", /*ios::binary |*/ ios::out);
 		for (int inp = 0; inp < INPUT_NEURONS + 1; inp++)
 		{
 			for (int hid = 0; hid < HIDDEN_NEURONS; hid++)
 			{
-				//fprintf(weights, "%g\n", wih[inp][hid]);
-				fileRead.write(reinterpret_cast<const char*>(&wih[inp][hid]), sizeof(wih[inp][hid]));
+				fileRead << wih[inp][hid] << endl;
 			}
 		}
 		for (int hid = 0; hid < HIDDEN_NEURONS + 1; hid++)
 		{
 			for (int outp = 0; outp < OUTPUT_NEURONS; outp++)
 			{
-				//fprintf(weights, "%g\n", who[hid][outp]);
-				fileRead.write(reinterpret_cast<const char*>(&who[hid][outp]), sizeof(who[hid][outp]));
+				fileRead << who[hid][outp] << endl;
 			}
 		}
 
 		for (int j = 0; j < HIDDEN_NEURONS; j++)
 		{
-			//fprintf(weights, "%g\n", hidden[j]);
-			fileRead.write(reinterpret_cast<const char*>(&hidden[j]), sizeof(hidden[j]));
+			fileRead << hidden[j] << endl;
 		}
 		for (int j = 0; j < OUTPUT_NEURONS; j++)
 		{
-			//fprintf(weights, "%g\n", target[j]);
-			fileRead.write(reinterpret_cast<const char*>(&target[j]), sizeof(target[j]));
+			fileRead << target[j] << endl;
 		}
 		for (int j = 0; j < OUTPUT_NEURONS; j++)
 		{
-			//fprintf(weights, "%g\n", actual[j]);
-			fileRead.write(reinterpret_cast<const char*>(&actual[j]), sizeof(actual[j]));
+			fileRead << actual[j] << endl;
 		}
-		//fclose(weights);
+		for (int j = 0; j < INPUT_NEURONS; j++)
+		{
+			fileRead << inputs[j] << endl;
+		}
+		for (int j = 0; j < OUTPUT_NEURONS; j++)
+		{
+			fileRead << erro[j] << endl;
+		}
+		for (int j = 0; j < HIDDEN_NEURONS; j++)
+		{
+			fileRead << errh[j] << endl;
+		}
 		fileRead.close();
 	}
 	else {
-		for (int inp = 0; inp < INPUT_NEURONS + 1; inp++)
+		/*for (int inp = 0; inp < INPUT_NEURONS + 1; inp++)
 		{
 			for (int hid = 0; hid < HIDDEN_NEURONS; hid++)
 			{
@@ -301,7 +301,7 @@ int main()
 		for (int j = 0; j < OUTPUT_NEURONS; j++)
 		{
 			printf("actual %f\n", actual[j]);
-		}
+		}*/
 	}
 	return 0;
 }
